@@ -163,3 +163,83 @@ for( int i = 0; i < 1000; ++i){
 }
 ```
 上面的会在循环过程中进行多次重新分配内存，下面的在循环过程中不会重新分配内存
+## 4.20
+1. 字符串常见的4种实现方式
+```cpp
+1.1  string对象包括：
+Allocator
+大小
+容量
+指针；指针指向-->RefCnt(引用计数)+值
+```
+```cpp
+1.2 string对象包括：
+指针；指针指向-->大小，容量，RefCnt，其他数据，指针(指向-->值);
+```
+```cpp
+1.3 stirng对象包括：
+指针；指针指向-->大小，容量，RefCnt，值，与值的可共享性有关的数据
+```
+```cpp
+1.4
+当string容量小于15时
+string对象包括：
+Allocator，值，大小，容量
+
+当string容量大于15时
+string对象包括：
+Allocator，大小，容量，未用空间，指针；指针指向-->值
+```
+2. 只有当字符串被频繁拷贝时，引用计数才有用，不常拷贝的内存不值得引用计数
+
+3. decltype经验
+```cpp
+C++11
+
+int x = 3;
+decltype (x) y = 4;
+int foo( int a, int b);
+decltype( foo( 1, 2)) y = 3;  //y为int，y=4
+```
+```cpp
+C++14
+
+int x = 3;
+decltype( auto) y = x;
+int foo( int a, int b);
+decltype( auto) y = foo( 1, 2); //y为int，值为foo的返回值
+```
+4. 将vector传到C API中
+对于```vector<int> v```,希望将v传入```void dosomething( const int* pInt, size_t numberInts)```中
+```cpp
+if( !v.empty())
+  dosomething( &v[0], v.size());
+```
+不能传```v.begin()```因为```v.begin()```返回的是迭代器，而非首元素, 可以传```&*v.begin()```
+将string传到C API中
+对于```string s```,希望将ｓ传入```void dosomething( const char* pString);```使用c_str成员函数
+```cpp
+dosomething( s.c_str());
+```
+使用C API初始化vector
+```CPP
+size_t fillArray(double* pArray, isze_t arraySize);
+vector<double>vd( maxNumber);
+vd.resize( fillArray(&vd[0], vd.size())); //使用fillArry向vd中写入数据，再把vd大小改成fillArray所写入的元素个数
+```
+同理可以完成对```vector<char>```的数据写入，再用```string s(vc.begin(), vc.begin()+charNumber);```完成s的构建
+同城都是先写入vector再通过vector完成对于STL容器的写入
+5.　使用```swap```除去多余容器
+把容器从之前的大容量缩减到当前所需要的容量(称为shrink to fit)
+```cpp
+vector<container>(containers).swap(containers);
+  //创建临时对象，是containers的拷贝，vector的拷贝构造函数只会拷贝需要的大小，
+  //故此临时对象中没有多余容量，再与containers做swap操作，此时临时对象容量变为之前
+  //containers容量。在语句尾，临时对象被析构,释放之前container所占据的内存
+string也可以使用这种技巧
+```
+swap时不光两个容器内容交换，同时迭代器，指针，引用都交换(string除外)，迭代器，指针，引用依旧可用，并且指向同样的元素，只不过元素已经在另一个容器中
+6. 避免使用```vector<bool>```
+```vector<bool>```中并非存储了```bool```，存储的是```bool```的紧凑表示，一个```“bool”```仅仅占用一个二进制位
+```vecotr<bool>::operator[]```返回一个代理对象
+可以使用```deque<bool>```或```bitset```代替```vector<bool>```
