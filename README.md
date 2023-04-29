@@ -258,3 +258,18 @@ struct DerederenceLess{
 3. ```map```, ```multimap```的键无法更改，```set```, ```multiset```的键可以更改但不提倡，除非能保证容器依旧有序
 4. 考虑用排序的```vector```来代替关联容器(排序的```vector```消耗更少的内存 )，用```vector```代替```map```时，用```pair<K,V>```而非```pair< const K, V>```
 5. 当你很在乎效率时，谨慎决定选择map::operator[]或map::insert
+
+## 4.29
+1. 减少混用不同类型迭代器的机会，尽量使用iterator来代替const_iterator
+2. 使用distance和advance来将容器的const_iterator转换成iterator
+```cpp
+具体实现：
+advance( i, distance<const_iterator>( i, const_i));   //const_i为const_iterator
+
+//advance是一个函数模板，定义在<iterator>头文件中，用于将指定迭代器移动指定距离。
+
+//distance 是一个函数模板，定义在 <iterator> 头文件中，用于计算两个迭代器之间的距离。
+//distance必须要加上const_iterator，否则出现二义性，因为i是非const的iterator，
+//distance不知道调用const版本的函数还是非const版本的函数
+```
+3. 使用reverse_iterator的base() 成员函数可以得到与之对应的iterator
