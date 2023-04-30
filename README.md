@@ -273,3 +273,32 @@ advance( i, distance<const_iterator>( i, const_i));   //const_i为const_iterator
 //distance不知道调用const版本的函数还是非const版本的函数
 ```
 3. 使用reverse_iterator的base() 成员函数可以得到与之对应的iterator
+reverse_iterator 类型的迭代器 rit，并通过 rit.base() 获取其所适配的迭代器，
+```rbegin()```函数所返回的迭代器指向的是容器中最后一个元素，因此调用 ```base()``` 函数所得到的原始迭代器指向的是容器中最后一个元素的下一个位置。
+```rend()```函数所返回的迭代器指向的是容器中第一个元素的前一个位置，因此调用 ```base()``` 函数所得到的原始迭代器指向的是容器中第一个元素的位置。
+```base()```函数是得到当前reverse_iterator的下一个位置的iterator
+```cpp
+         rend  begin           rbegin  end          
+          |     |                 |     |
+          |     |                 |     |
+vector: | 空 |  1  |  2  |  3  |  4  |  空  |
+```
+```cpp
+    std::vector<int> v = { 1, 2, 3, 4, 5 };
+    auto rit = v.rend( ); // 获取反向迭代器
+    auto it = rit.base( );
+    std::cout << *(it ) << std::endl; // 输出 1
+    rit = v.rbegin( );
+    it = rit.base( );
+    std::cout << *(it - 1) << std::endl; //输出5
+```
+4.30
+对于逐个字符的输入考虑使用istreambuf_iterator
+```cpp
+fileName.unsetf( ios::skipws);  //禁止忽略fileName中的空白字符
+```
+```istreambuf_iterator<char>```对象直接从输入的缓冲区中读取下一个字符（```istreambuf_iterator<char>```对象从一个输入流```istream s```中读取下一个字符的操作是通过```s.rdbuf()->sgetc()```完成的。相比于常规的读取方法，如 ```s.get()```、```s.peek()```（用于预读取流中的下一个字符，但并不实际从流中取出该字符） 或者 ```s >> c``` 等等，```s.rdbuf()->sgetc()``` 的优点在于可以直接读取缓冲区中的下一个字符，而无需进行字符流的解析和格式化，因此速度相对较快。）
+```cpp
+ifstream inputFile( "inputName.txt");
+string fileData( ( istreambuf_iterator<char>( inputFile)), istreambuf_iterator<char>() );
+```
