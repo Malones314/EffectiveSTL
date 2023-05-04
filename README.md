@@ -292,7 +292,7 @@ vector: | 空 |  1  |  2  |  3  |  4  |  空  |
     it = rit.base( );
     std::cout << *(it - 1) << std::endl; //输出5
 ```
-4.30
+## 4.30
 对于逐个字符的输入考虑使用istreambuf_iterator
 ```cpp
 fileName.unsetf( ios::skipws);  //禁止忽略fileName中的空白字符
@@ -301,4 +301,34 @@ fileName.unsetf( ios::skipws);  //禁止忽略fileName中的空白字符
 ```cpp
 ifstream inputFile( "inputName.txt");
 string fileData( ( istreambuf_iterator<char>( inputFile)), istreambuf_iterator<char>() );
+```
+## 5.4
+1.  如果所使用的算法需要指定一个目标区间，那么必须要确保目标区间足够大，或者确保它会随着算法的运行而增大，在算法执行过程中如果要加大目标区间，要使用插入型迭代器(由ostream_iterator, back_inserter, front_inserter返回的迭代器)
+2. 做好排序算法的选择
+```cpp
+//使用compareFunction排序好container的前20个元素，使得container的前20个元素是有序的
+partial_sort( container.begin(), container.begin() + 20, container.end(), cmopareFunction);
+//因为 partial_sort 函数只保证前 k 个元素是有序的，所以排序结果不一定是完全有序的。
+//如果容器中元素的数量小于 k，则对整个容器进行排序。
+
+//如果你想取前十个最大的数字，但是有 13 个数字是等价最大的，
+//partial_sort 可能会选择其中的任意 10 个数字作为前十个最大的数字，
+//而其他 3 个数字则可能出现在第 11 到第 13 个位置。
+```
+```cpp
+//使用compareFunction排序好container的前20个元素，但container的前20个元素是无序的
+nth_element( container.begin(), containber.begin() + 19, container.end(), compareFunction);
+
+//得到前20个经过compareFunction排序后的元素(这20个元素无序)
+//nth_element 算法会将序列分为两部分，前半部分的元素都小于等于第 n 个元素，
+//而后半部分的元素都大于等于第 n 个元素。并且，第 n 个元素在排序后应该处于它的最终位置上。
+//如果容器中元素的数量小于 k，则对整个容器进行排序，相当于使用 sort 函数。
+//如果你想取前十个最大的数字，但是有 13 个数字是等价最大的，
+//无法确定在具体情况下 nth_element 会选择哪个等价最大的元素作为第 n 个元素。
+```
+```cpp
+//如果需要相对位置排序，可以使用stable_sort 
+stable_sort( container.begin(), container.begin() + 20, container.end(), cmopareFunction);
+//排序前20个元素，序列中相等的元素在排序后的序列中的相对位置不变。
+//使用自定义的cmopareFunction排序函数
 ```
