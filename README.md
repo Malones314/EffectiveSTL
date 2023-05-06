@@ -303,8 +303,9 @@ ifstream inputFile( "inputName.txt");
 string fileData( ( istreambuf_iterator<char>( inputFile)), istreambuf_iterator<char>() );
 ```
 ## 5.4
-1.  如果所使用的算法需要指定一个目标区间，那么必须要确保目标区间足够大，或者确保它会随着算法的运行而增大，在算法执行过程中如果要加大目标区间，要使用插入型迭代器(由ostream_iterator, back_inserter, front_inserter返回的迭代器)
-2. 做好排序算法的选择
+### 1. 对区间进行操作
+如果所使用的算法需要指定一个目标区间，那么必须要确保目标区间足够大，或者确保它会随着算法的运行而增大，在算法执行过程中如果要加大目标区间，要使用插入型迭代器(由ostream_iterator, back_inserter, front_inserter返回的迭代器)
+### 2. 做好排序算法的选择
 ```cpp
 //使用compareFunction排序好container的前20个元素，使得container的前20个元素是有序的
 partial_sort( container.begin(), container.begin() + 20, container.end(), cmopareFunction);
@@ -332,3 +333,31 @@ stable_sort( container.begin(), container.begin() + 20, container.end(), cmopare
 //排序前20个元素，序列中相等的元素在排序后的序列中的相对位置不变。
 //使用自定义的cmopareFunction排序函数
 ```
+```cpp
+partition算法把所有符合条件的元素放在区间前部
+bool hasAcceptable( const myClass& c){
+  ........
+}
+vecotr<myClass>::iterator ci = partition( vmyClass.begin(), vmyClass.end, hasAcceptable); 
+//将所有满足条件的元素移到前面，返回第一个不满足条件的myClass
+```
+#### 总结：
+对vector、string、deque或者数组中元素执行操作，
+如果要对所有元素进行一次完全排序，使用sort或stable_sort
+如果要对等价性最前面的n个元素排序，使用partial_sort
+如果要找到第n个位置上的元素，或要找等价性最前面的n个元素且不必对这前n个排序，使用nth_element
+
+如果需要将标准序列容器中的元素按照是否满足某个特定的条件区分开来，使用partition或stable_partition
+
+如果数据在list中，仍然可以使用partition和stable_partition；可以使用list::sort代替sort；但是不能直接使用partition_sort或nth_element
+一种做法是把list中的元素拷贝到提供随机访问迭代器的容器中
+第二种是创建一个list::iterator容器，对该容器执行相对的算法，然后通过其中的迭代器让问list的元素
+第三种做法是利用一个包含迭代器的有序容器种的信息，反复调用splice成员函数，将list种的元素调整到期望的目标位置
+
+根据空间时间效率，这些排序算法从资源消耗从低到高排序如下：
+1. partition
+2. stable_partition
+3. nth_element
+4. partial_sort
+5. sort
+6. stable_sort
