@@ -361,3 +361,21 @@ vecotr<myClass>::iterator ci = partition( vmyClass.begin(), vmyClass.end, hasAcc
 4. partial_sort
 5. sort
 6. stable_sort
+
+## 5.5
+1. remove有时并不是真正意义上的删除
+```cpp
+remove把要删除的元素移到容器最后，返回最后一个不符合删除条件的元素的指针
+eg：
+vector <int> v;
+v.reserve( 10);
+for( int i = 0; i < 10; i++){
+  v.push_back(i);
+}
+v[0] = v[1] = v[2] = 1;
+auto newEnd(remove( v.begin(), v.end(), 1));
+cout << v.size(); //输出10；
+v.erase(newEnd, v.end()); //真正删除元素
+cout << v.size(); //输出7；
+```
+2. 当容器中存放的是动态分配的对象的指针时，要避免使用remove和类似算法。可以考虑使用partition算法。正确的做法是先把要删除的指针内容free后置空，然后删除所有空指针。最方便的做法是使用智能指针。
